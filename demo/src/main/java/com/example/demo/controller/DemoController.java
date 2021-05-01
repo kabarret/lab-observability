@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.model.BuyRequest;
 import com.example.demo.model.DemoData;
+import com.example.demo.model.Purchase;
+import com.example.demo.repository.PurchaseRepository;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.prometheus.client.Histogram;
@@ -65,10 +67,22 @@ public class DemoController {
                 .register(meterRegistry);
     }
 
+    @Autowired
+    private PurchaseRepository repository;
+
     @PostMapping("/buy")
     public ResponseEntity buy(@RequestBody BuyRequest buyRequest){
         amountValueSpend.record(buyRequest.getValue());
+        Purchase purchase = Purchase.builder()
+                .product(buyRequest.getProduct()).value(buyRequest.getValue()).build();
+        repository.save(purchase);
         System.out.println("recoded value: " + buyRequest.getValue());
         return new ResponseEntity(buyRequest, HttpStatus.OK);
+    }
+
+    @RequestMapping("/buy")
+    public ResponseEntity listPurchase(){
+        Iterable<Purchase> repositoryAll = repository.findAll();
+        return new ResponseEntity(repositoryAll, HttpStatus.OK);
     }
 }

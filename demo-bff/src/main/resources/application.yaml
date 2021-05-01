@@ -1,0 +1,33 @@
+management:
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+distribution.percentiles-histogram.http.server.requests: rue
+
+server.port: 8082
+
+management.health.circuitbreakers.enabled: true
+
+resilience4j.retry:
+  retryAspectOrder: 2
+  instances:
+    backendrety:
+      maxAttempts: 3
+      waitDuration: 1s
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+resilience4j.circuitbreaker:
+  circuitBreakerAspectOrder: 1
+  enabled: true
+  configs:
+    default:
+      registerHealthIndicator: true
+  instances:
+    backend:
+      slidingWindowSize: 2
+      minimumNumberOfCalls: 3
+      waitDurationInOpenState: 5000
